@@ -1,1 +1,1 @@
-Make AI video of any legth using free AI tool
+Make AI video of any length using free AI tool
