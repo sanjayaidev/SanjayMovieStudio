@@ -8,6 +8,17 @@
 </head>
 <body>
   <div class="app">
+    <!-- Access Key Overlay -->
+    <div id="access-overlay" class="access-overlay hidden">
+      <div class="access-modal">
+        <h2>🔐 Enter Access Key</h2>
+        <p class="access-modal-desc">This studio is protected. Please enter your access key to continue.</p>
+        <input type="password" id="access-key-input" placeholder="Enter your access key" />
+        <button id="access-submit-btn" class="btn-primary">Unlock Studio</button>
+        <div id="access-error" class="error"></div>
+      </div>
+    </div>
+
     <header>
       <h1>🎬 Animated Video Studio</h1>
       <p class="subtitle">Director-level AI storyboarding with style continuity</p>

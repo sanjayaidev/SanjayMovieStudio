@@ -10,6 +10,10 @@ const FIXED_SEGMENT_DURATION = 5;
 // ?key=YOUR_KEY in the URL — the key is cached in localStorage and
 // the query param is then stripped from the address bar. If the
 // server has no APP_ACCESS_KEY set, this is a harmless no-op.
+// 
+// NEW: Full-screen overlay that prompts for the access key if not
+// already stored. The overlay covers the entire screen and only
+// disappears when the correct key is entered.
 // ============================================================
 const ACCESS_KEY_STORAGE_KEY = 'appAccessKey';
 
@@ -22,10 +26,81 @@ const ACCESS_KEY_STORAGE_KEY = 'appAccessKey';
     const cleanUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '') + window.location.hash;
     window.history.replaceState({}, '', cleanUrl);
   }
+  
+  // Check if we need to show the access overlay
+  checkAccessOverlay();
 })();
 
 function getAccessKey() {
   try { return localStorage.getItem(ACCESS_KEY_STORAGE_KEY) || ''; } catch (e) { return ''; }
+}
+
+// Show/hide the full-screen access overlay based on whether a key is stored
+function checkAccessOverlay() {
+  const overlay = document.getElementById('access-overlay');
+  if (!overlay) return;
+  
+  const storedKey = getAccessKey();
+  if (storedKey) {
+    // Key exists, hide overlay
+    overlay.classList.add('hidden');
+  } else {
+    // No key, show overlay
+    overlay.classList.remove('hidden');
+    // Focus the input field
+    setTimeout(() => {
+      const input = document.getElementById('access-key-input');
+      if (input) input.focus();
+    }, 100);
+  }
+}
+
+// Verify the access key by making a health check request
+async function verifyAccessKey(key) {
+  try {
+    const response = await fetch('/api/health', {
+      headers: { 'x-app-key': key }
+    });
+    const data = await response.json();
+    return response.ok && data.status === 'ok';
+  } catch (error) {
+    return false;
+  }
+}
+
+// Handle access key submission from the overlay
+async function handleAccessSubmit() {
+  const overlay = document.getElementById('access-overlay');
+  const input = document.getElementById('access-key-input');
+  const errorEl = document.getElementById('access-error');
+  const submitBtn = document.getElementById('access-submit-btn');
+  
+  const key = input.value.trim();
+  if (!key) {
+    errorEl.textContent = 'Please enter an access key';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ Verifying...';
+  errorEl.style.display = 'none';
+  
+  const isValid = await verifyAccessKey(key);
+  
+  if (isValid) {
+    try { localStorage.setItem(ACCESS_KEY_STORAGE_KEY, key); } catch (e) {}
+    overlay.classList.add('hidden');
+    input.value = '';
+  } else {
+    errorEl.textContent = 'Invalid access key. Please try again.';
+    errorEl.style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+  
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Unlock Studio';
 }
 
 // Drop-in replacement for fetch() that attaches x-app-key to every
@@ -62,6 +137,25 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     currentTab = targetTab;
   });
 });
+
+// ============================================================
+// ACCESS OVERLAY EVENT LISTENERS
+// ============================================================
+const accessSubmitBtn = document.getElementById('access-submit-btn');
+const accessKeyInput = document.getElementById('access-key-input');
+
+if (accessSubmitBtn) {
+  accessSubmitBtn.addEventListener('click', handleAccessSubmit);
+}
+
+if (accessKeyInput) {
+  // Allow pressing Enter to submit
+  accessKeyInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleAccessSubmit();
+    }
+  });
+}
 
 // ============================================================
 // UTILITY FUNCTIONS

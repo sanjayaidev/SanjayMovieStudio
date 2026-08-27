@@ -765,6 +765,60 @@ textarea:disabled, input:disabled {
   text-decoration: underline;
 }
 
+/* ---------------- Access overlay (full screen) ---------------- */
+.access-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 15, 20, 0.98);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.access-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.access-modal h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+.access-modal-desc {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+.access-modal input[type="password"],
+.access-modal input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.access-modal input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.access-modal .btn-primary {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 18px;
+  font-size: 15px;
+}
+
 /* ---------------- Toast ---------------- */
 .toast {
   position: fixed;
