@@ -56,7 +56,6 @@ if (!APP_ACCESS_KEY) {
 }
 
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health') return next(); // always allow health checks
   if (!APP_ACCESS_KEY) return next(); // gate disabled locally
 
   const provided = req.get('x-app-key') || req.query.key || '';
