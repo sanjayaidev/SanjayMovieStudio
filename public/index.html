@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Video Studio</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🎬 Animated Video Studio</h1>
+      <p class="subtitle">Director-level AI storyboarding with style continuity</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="new-story">🎬 New Story</button>
+      <button class="tab-btn" data-tab="story-writer">✍️ Story Writer</button>
+      <button class="tab-btn" data-tab="continue-story">🔄 Continue Story</button>
+      <button class="tab-btn" data-tab="generate-scenes">🖼️ Generate from Scenes</button>
+    </nav>
+
+    <main>
+      <!-- ==================== TAB 1: NEW STORY ==================== -->
+      <div class="tab-content active" id="tab-new-story">
+        <div class="panel">
+          <h2>📝 Create Your Story</h2>
+          
+          <div class="input-section">
+            <label for="story-style">🎨 Visual Style <span class="required">*</span></label>
+            <textarea id="story-style" placeholder="e.g., Pixar 3D animation style, vibrant colors, soft lighting, cartoon characters with big eyes..." rows="3" required></textarea>
+            <div class="input-hint">Describe the visual style, art direction, and mood</div>
+          </div>
+
+          <div class="input-section">
+            <label for="story-script">📖 Story Script <span class="required">*</span></label>
+            <textarea id="story-script" placeholder="e.g., A curious cat explores a magical forest, discovers a glowing mushroom, and befriends a friendly rabbit..." rows="5" required></textarea>
+            <div class="input-hint">Describe the narrative, characters, and actions</div>
+          </div>
+
+          <div class="duration-controls">
+            <div class="duration-group">
+              <label for="story-duration">Total Duration</label>
+              <div class="stepper">
+                <button type="button" class="stepper-btn" id="duration-decrease">−</button>
+                <input type="number" id="story-duration" value="30" min="5" max="120" step="5" readonly>
+                <button type="button" class="stepper-btn" id="duration-increase">+</button>
+              </div>
+              <div class="input-hint">Total video length (multiples of 5s)</div>
+            </div>
+
+            <div class="duration-group">
+              <label>Segment Duration</label>
+              <div class="fixed-value">5 seconds</div>
+              <div class="input-hint">Fixed by AI video model (121 frames @ 24fps)</div>
+            </div>
+          </div>
+
+          <div class="time-estimate" id="time-estimate">
+            <span class="time-icon">⏱️</span>
+            <span class="time-text">Estimated time: <strong>24-30 minutes</strong> (6 segments × 4-5 min each)</span>
+          </div>
+
+          <div class="action-buttons">
+            <button id="generate-btn" class="btn-primary">🚀 Generate Animated Video</button>
+            <button id="stop-btn" class="btn-secondary hidden">⏹️ Stop Generation</button>
+          </div>
+
+          <div id="error-msg" class="error"></div>
+        </div>
+
+        <!-- Review & Edit Panel -->
+        <div class="panel review-panel hidden" id="review-panel">
+          <h2>📝 Review & Edit Scenes</h2>
+          <p class="panel-description">Check each scene's prompt below and edit anything you'd like before video generation starts.</p>
+
+          <div class="review-list" id="review-list"></div>
+
+          <div class="action-buttons">
+            <button id="review-back-btn" class="btn-secondary">⬅️ Back</button>
+            <button id="review-confirm-btn" class="btn-primary">✅ Looks Good — Generate Videos</button>
+          </div>
+
+          <div id="review-error" class="error"></div>
+        </div>
+
+        <!-- Sequence Flow Grid -->
+        <div class="panel sequence-panel hidden" id="sequence-panel">
+          <h2>🎞️ Story Sequence</h2>
+          
+          <div class="sequence-controls">
+            <button id="export-btn" class="btn-small hidden">⬇️ Export Generated So Far</button>
+            <button id="merge-btn" class="btn-small hidden">🎬 Final Merge</button>
+            <button id="download-final-btn" class="btn-small hidden">💾 Download Final</button>
+          </div>
+
+          <div class="sequence-grid" id="sequence-grid"></div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: STORY WRITER ==================== -->
+      <div class="tab-content" id="tab-story-writer">
+        <div class="panel">
+          <h2>✍️ AI Story Writer</h2>
+          <p class="panel-description">Transform a short summary into a vivid, animated story</p>
+
+          <div class="input-section">
+            <label for="writer-summary">📌 Story Summary <span class="required">*</span></label>
+            <textarea id="writer-summary" placeholder="e.g., A lonely robot finds a flower in a post-apocalyptic city and learns to care again..." rows="3"></textarea>
+            <div class="input-hint">A short summary or idea to expand into a full story</div>
+          </div>
+
+          <div class="input-section">
+            <label for="writer-style">🎨 Visual Style (Optional)</label>
+            <textarea id="writer-style" placeholder="e.g., Pixar 3D, Studio Ghibli, cyberpunk..." rows="2"></textarea>
+          </div>
+
+          <div class="writer-actions">
+            <button id="writer-generate-btn" class="btn-primary">✨ Generate Story</button>
+          </div>
+
+          <div id="writer-error" class="error"></div>
+
+          <div class="writer-output hidden" id="writer-output">
+            <label>📖 Generated Story</label>
+            <textarea id="writer-story-text" rows="10" placeholder="Your generated story will appear here..."></textarea>
+            
+            <div class="writer-refine">
+              <input type="text" id="writer-refine-input" placeholder="e.g., Make it more dramatic, add more action, shorten it...">
+              <button id="writer-refine-btn" class="btn-small">🔄 Refine</button>
+            </div>
+
+            <div class="writer-actions">
+              <button id="writer-copy-btn" class="btn-secondary">📋 Copy to Clipboard</button>
+              <button id="writer-clear-btn" class="btn-secondary">🗑️ Clear</button>
+              <button id="writer-use-btn" class="btn-primary">🎬 Use in New Story</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: CONTINUE STORY ==================== -->
+      <div class="tab-content" id="tab-continue-story">
+        <div class="panel">
+          <h2>🔄 Continue a Story</h2>
+          <p class="panel-description">Upload a video or image to continue generation with perfect continuity</p>
+
+          <div class="upload-tabs">
+            <button class="upload-tab-btn active" data-upload="video">📹 Upload Video</button>
+            <button class="upload-tab-btn" data-upload="image">🖼️ Upload Image</button>
+          </div>
+
+          <div class="upload-area" id="continue-upload-area">
+            <div class="upload-zone" id="continue-drop-zone">
+              <div class="upload-icon">📤</div>
+              <p>Drag & drop or click to upload</p>
+              <p class="upload-hint" id="continue-upload-hint">Video: MP4, max 10MB, max 5 seconds</p>
+              <input type="file" id="continue-file-input" accept="video/mp4,video/quicktime,video/webm" class="hidden">
+            </div>
+            <div id="continue-preview" class="upload-preview hidden"></div>
+          </div>
+
+          <div class="input-section">
+            <label for="continue-style">🎨 Visual Style <span class="required">*</span></label>
+            <textarea id="continue-style" placeholder="Describe the style of your uploaded content..." rows="2"></textarea>
+          </div>
+
+          <div class="input-section">
+            <label for="continue-script">📖 Continuation Script <span class="required">*</span></label>
+            <textarea id="continue-script" placeholder="What happens next in the story..." rows="4"></textarea>
+          </div>
+
+          <div class="duration-controls">
+            <div class="duration-group">
+              <label for="continue-duration">Continuation Duration</label>
+              <div class="stepper">
+                <button type="button" class="stepper-btn" id="continue-duration-decrease">−</button>
+                <input type="number" id="continue-duration" value="15" min="5" max="60" step="5" readonly>
+                <button type="button" class="stepper-btn" id="continue-duration-increase">+</button>
+              </div>
+            </div>
+            <div class="duration-group">
+              <label>Segment Duration</label>
+              <div class="fixed-value">5 seconds</div>
+            </div>
+          </div>
+
+          <div class="time-estimate" id="continue-time-estimate">
+            <span class="time-icon">⏱️</span>
+            <span class="time-text">Estimated time: <strong>12-15 minutes</strong> (3 segments × 4-5 min each)</span>
+          </div>
+
+          <button id="continue-generate-btn" class="btn-primary">🚀 Continue Generation</button>
+          <div id="continue-error" class="error"></div>
+        </div>
+
+        <div class="panel sequence-panel hidden" id="continue-sequence-panel">
+          <h2>🎞️ Continuation Sequence</h2>
+          <div class="sequence-controls">
+            <button id="continue-export-btn" class="btn-small hidden">⬇️ Export So Far</button>
+            <button id="continue-merge-btn" class="btn-small hidden">🎬 Final Merge</button>
+          </div>
+          <div class="sequence-grid" id="continue-sequence-grid"></div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: GENERATE FROM SCENES ==================== -->
+      <div class="tab-content" id="tab-generate-scenes">
+        <div class="panel">
+          <h2>🖼️ Generate from Scenes</h2>
+          <p class="panel-description">Upload images one-by-one and generate a video for each scene</p>
+
+          <div id="scenes-list" class="scenes-list"></div>
+
+          <button id="add-scene-btn" class="btn-secondary">➕ Add Scene</button>
+
+          <div class="action-buttons">
+            <button id="scenes-generate-btn" class="btn-primary">🚀 Generate All Scenes</button>
+            <button id="scenes-stop-btn" class="btn-secondary hidden">⏹️ Stop</button>
+          </div>
+
+          <div id="scenes-error" class="error"></div>
+        </div>
+
+        <div class="panel sequence-panel hidden" id="scenes-sequence-panel">
+          <h2>🎞️ Scene Sequence</h2>
+          <div class="sequence-controls">
+            <button id="scenes-export-btn" class="btn-small hidden">⬇️ Export So Far</button>
+            <button id="scenes-merge-btn" class="btn-small hidden">🎬 Final Merge</button>
+          </div>
+          <div class="sequence-grid" id="scenes-sequence-grid"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
